@@ -25,6 +25,7 @@ public class BotFlowService {
     private final ResponseRepository      responseRepository;
     private final AnswerRepository        answerRepository;
     private final OllamaService           ollamaService;
+    private final BulkSentimentService bulkSentimentService;
 
     private static final int SESSION_TIMEOUT_HOURS = 24;
     private static final List<String> PAUSE_KEYWORDS = List.of(
@@ -219,6 +220,10 @@ public class BotFlowService {
         }
 
         answerRepository.save(answer);
+
+        if (answer.getComment() != null && !answer.getComment().isBlank()) {
+            bulkSentimentService.analyzeAndSaveOneAsync(answer.getId());
+        }
 
         log.info("Answer salva — eixo: {} | nota: {} | sessão: {}",
                 currentQuestion.getAxis(), rating, session.getId());
